@@ -27,9 +27,7 @@ if (-e $fp) { # If the file already exists load it
 	%reminders = (
 		LAST_KEY => 0,
 	);
-	Xchat::print(to_json(\%reminders));
 	&commit();
-	Xchat::print("Created JSON file.");
 }
 
 sub add {
@@ -62,6 +60,8 @@ sub del {
 	} else {
 		if (defined $reminders{$_[0][1]}) {
 			delete $reminders{$_[0][1]};
+			my @sorted = sort {$a <=> $b} keys %reminders;
+			$reminders{LAST_KEY} = $sorted[-1];
 			&commit();
 		} else {
 			Xchat::print("ERROR: $_[0][1], invalid key.");
