@@ -48,23 +48,25 @@ sub add {
 		Message => $message
 	};
 	&commit();
-	Xchat::print("Reminder $key added.") if defined $reminders{$key}{Time};
+	Xchat::print("Reminder $key added.") if defined $reminders{$key};
 }
 
 sub del {
-	if ($_[0][1] =~ /all/) {
-		%reminders = (
-		    LAST_KEY => 0,
+	my $key = $_[0][1];
+	if ($key =~ /all/) {
+		%reminders = ( 
+			LAST_KEY => 0,
 		);
 		&commit();
 	} else {
-		if (defined $reminders{$_[0][1]}) {
-			delete $reminders{$_[0][1]};
+		if (defined $reminders{$key}) {
+			delete $reminders{$key};
 			my @sorted = sort {$a <=> $b} keys %reminders;
 			$reminders{LAST_KEY} = $sorted[-1];
 			&commit();
+			Xchat::print("Reminder $key deleted") unless defined $reminders{$key};
 		} else {
-			Xchat::print("ERROR: $_[0][1], invalid key.");
+			Xchat::print("ERROR: $key, invalid key.");
 		}
 	}
 }
