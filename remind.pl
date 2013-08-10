@@ -16,11 +16,11 @@ Xchat::hook_command('remind->commit' => \&commit);
 
 my $fp = Xchat::get_info("xchatdir") . '/' . 'remind.json';
 my %reminders;
-my $notify = true; # Uses notify-send to send a desktop notification * GNU/Linux only. *
+my $notify = true; # Uses notify-send to send a desktop notification *System must have `notify-send`*
 
 
 if (-e $fp) { # If the file already exists load it
-  open(FILE, '<', $fp);
+	open(FILE, '<', $fp);
 	%reminders = %{decode_json(<FILE>)};
 	close(FILE);
 } else { # else Create it.
@@ -37,8 +37,13 @@ sub add {
 	my $seconds = $_[0][1];
 	my $message = $_[1][2];
 	unless ($seconds =~ /^[0-9\.]+$/) {
-		Xchat::print("Time needs to be number.");
-		return; # End sub
+		if ($seconds =~ /d/) {
+			m/[0-9\.]+/;
+			$seconds = int($1) + 86400;
+		} else {
+			Xchat::print("Invaild time format.");
+			return; # End sub
+		}
 	}
 	$reminders{$key} = {
 		Time => time + $seconds,
@@ -65,7 +70,7 @@ sub del {
 }
 
 sub list {
-	foreach my $key (sort keys %reminders) {
+	foreach my $key (sort {$a <=> $b} keys %reminders) {
 		unless ($key eq 'LAST_KEY') {
 			Xchat::print("$key => $reminders{$key}->{Time}, $reminders{$key}->{Message}");
 		}
